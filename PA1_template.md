@@ -168,9 +168,9 @@ There are 8 days that have no valid measurement and 53 days that have no NA valu
 
 I would drop those days from the data set, but the assigment ask to fill their value. We fill them with **the average value per interval calculated previously**.
 
-To do so, we are going to generate a vector that repeats the averaged values 61 times, and then assign its value to every NA value in the _activitydata_ dataset.
-
 #### Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+We are going to generate a vector that repeats the averaged values 61 times, and then assign its value to every NA value in the _activitydata_ dataset.
 
 
 ```r
@@ -195,7 +195,7 @@ table( sapply(
 ## 61
 ```
 
-#### Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.
+#### Make a histogram of the total number of steps taken each day and calculate and report the mean and median total number of steps taken per day.
 
 Recalculate the mean number of steps per day.
 
@@ -334,26 +334,30 @@ We have to group the data by interval and by the column day before, then average
 activitybyintbyday <- group_by(activityfilled, interval, day)
 activitybyintbyday <- summarise(activitybyintbyday, mean = mean(steps))
 ```
+We can also calculate the cumsum by _day_
+
+```r
+activitybyintbyday <- group_by(ungroup(activitybyintbyday), day)
+activitybyintbyday <- mutate(activitybyintbyday, cumsum = cumsum(mean))
+```
 
 and finally plot, assuming our data cover the whole day:
 
 
 ```r
 ggplot(activitybyintbyday, aes(x=interval/98.125))+
-  scale_x_continuous(breaks = seq(0,24,2))+
+  scale_x_continuous(limits = c(0,24), breaks = seq(0,24,2))+
   geom_line(aes( y = mean)) + 
+  geom_line(aes(y = cumsum/60), col = "red")+
   facet_grid(day ~ .) +
-  xlim(0,24)+
-  xlab("hour")
+  xlab("hour")+
+  ylab("mean number of steps")+
+  ggtitle("Average daily patterns for Weekdays and Weekends")
 ```
 
-```
-## Scale for 'x' is already present. Adding another scale for 'x', which will replace the existing scale.
-```
+![](PA1_template_files/figure-html/unnamed-chunk-20-1.png) 
 
-![](PA1_template_files/figure-html/unnamed-chunk-19-1.png) 
-
-We can see that at weekends the activity starts a little bit later, and there seems to be more activity during the afternoon and the evening.
+We have divided the _cumsum_ by $60$ to be able to represent both lines in the same chart. We can see that on weekends the activity starts a little bit later, and there seems to be more activity during the afternoon and the evening. On the other side, on weekdays, there is much more activity in the morning.
 
 
 ```r
