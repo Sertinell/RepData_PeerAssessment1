@@ -1,5 +1,27 @@
 # Reproducible Research: Peer Assessment 1
 
+Load packages
+
+```r
+library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
+library(ggplot2)
+```
 
 ## Loading and preprocessing the data
 
@@ -32,7 +54,16 @@ str(activitydata)
 ##  $ date    : Factor w/ 61 levels "2012-10-01","2012-10-02",..: 1 1 1 1 1 1 1 1 1 1 ...
 ##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ```
-The data seems to be ok, so no preprocessing is needed.
+
+Transform the interval column to represent the hours of the day in decimal format.
+
+
+```r
+activitydata <- mutate(activitydata, interval = (
+                         as.integer(interval / 100) + 
+                         (interval  %% 100)/60) 
+                       )
+```
 
 ## What is mean total number of steps taken per day?
 
@@ -41,23 +72,6 @@ The data seems to be ok, so no preprocessing is needed.
 Load dpylr package. Then group by date, sum all the steps per each day and
 finally calculate the mean.
 
-
-```r
-library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-## 
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
 
 ```r
 activitybydate <- group_by(activitydata, date)
@@ -93,7 +107,7 @@ hist(activitybydate$totalsteps,
      xlab = "Total Steps")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
 ## What is the average daily activity pattern?
 
@@ -108,7 +122,7 @@ activitybyinterval <- summarise(activitybyinterval,
 
 #### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-The interval that contains the maximum average number of steps is:
+The interval that contains the maximum average number of steps is 8:35h.
 
 
 ```r
@@ -117,8 +131,10 @@ activitybyinterval$interval[
 ```
 
 ```
-## [1] 835
+## [1] 8.583333
 ```
+
+
 
 #### Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
@@ -131,7 +147,7 @@ plot(x = activitybyinterval$interval, activitybyinterval$mean,
      main = "Steps across the day")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
 
 ## Imputing missing values
 
@@ -166,11 +182,11 @@ There are 8 days that have no valid measurement and 53 days that have no NA valu
 
 #### Devise a strategy for filling in all of the missing values in the dataset.
 
-I would drop those days from the data set, but the assigment ask to fill their value. We fill them with **the average value per interval calculated previously**.
+I would drop those days from the data set, but the assignment ask to fill their value. We fill them with **the average value per interval calculated previously**.
 
 #### Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
-We are going to generate a vector that repeats the averaged values 61 times, and then assign its value to every NA value in the _activitydata_ dataset.
+We are going to generate a vector that repeats the averaged values 61 times, and then assign its value to every NA value in the _activitydata_ data set.
 
 
 ```r
@@ -244,7 +260,7 @@ hist(activitybydate$totalsteps,
      xlab = "Total Steps")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-12-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-14-1.png) 
 
 The histogram has also changed, now there are many more elements in the center of the distribution. This happened because we created 8 new _average days_
 
@@ -260,7 +276,7 @@ activitybyinterval$interval[
 ```
 
 ```
-## [1] 835
+## [1] 8.583333
 ```
 
 ```r
@@ -270,7 +286,7 @@ plot(x = activitybyinterval$interval, activitybyinterval$mean,
      ylab = "steps")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-13-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-15-1.png) 
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -302,12 +318,12 @@ summary(activityfilled)
 
 ```
 ##      steps             date               interval        weekday         
-##  Min.   :  0.00   Min.   :2012-10-01   Min.   :   0.0   Length:17568      
-##  1st Qu.:  0.00   1st Qu.:2012-10-16   1st Qu.: 588.8   Class :character  
-##  Median :  0.00   Median :2012-10-31   Median :1177.5   Mode  :character  
-##  Mean   : 37.38   Mean   :2012-10-31   Mean   :1177.5                     
-##  3rd Qu.: 27.00   3rd Qu.:2012-11-15   3rd Qu.:1766.2                     
-##  Max.   :806.00   Max.   :2012-11-30   Max.   :2355.0                     
+##  Min.   :  0.00   Min.   :2012-10-01   Min.   : 0.000   Length:17568      
+##  1st Qu.:  0.00   1st Qu.:2012-10-16   1st Qu.: 5.979   Class :character  
+##  Median :  0.00   Median :2012-10-31   Median :11.958   Mode  :character  
+##  Mean   : 37.38   Mean   :2012-10-31   Mean   :11.958                     
+##  3rd Qu.: 27.00   3rd Qu.:2012-11-15   3rd Qu.:17.938                     
+##  Max.   :806.00   Max.   :2012-11-30   Max.   :23.917                     
 ##       day       
 ##  weekday:12960  
 ##  weekend: 4608  
@@ -319,13 +335,6 @@ summary(activityfilled)
 
 
 #### Make a plot:
-
-I like the ggplot2 library.
-
-
-```r
-library(ggplot2)
-```
 
 We have to group the data by interval and by the column day before, then average:
 
@@ -345,7 +354,7 @@ and finally plot, assuming our data cover the whole day:
 
 
 ```r
-ggplot(activitybyintbyday, aes(x=interval/98.125))+
+ggplot(activitybyintbyday, aes(x=interval))+
   scale_x_continuous(limits = c(0,24), breaks = seq(0,24,2))+
   geom_line(aes( y = mean)) + 
   geom_line(aes(y = cumsum/60), col = "red")+
@@ -355,7 +364,7 @@ ggplot(activitybyintbyday, aes(x=interval/98.125))+
   ggtitle("Average daily patterns for Weekdays and Weekends")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-20-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-21-1.png) 
 
 We have divided the _cumsum_ by $60$ to be able to represent both lines in the same chart. We can see that on weekends the activity starts a little bit later, and there seems to be more activity during the afternoon and the evening. On the other side, on weekdays, there is much more activity in the morning.
 
